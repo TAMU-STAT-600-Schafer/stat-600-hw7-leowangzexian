@@ -1,4 +1,5 @@
 # Load the data
+setwd("/Users/wangzexianleo/Desktop/PhD/STAT600/HW/stat-600-hw3-leowangzexian")
 
 # Training data
 letter_train <- read.table("Data/letter-train.txt", header = F, colClasses = "numeric")
