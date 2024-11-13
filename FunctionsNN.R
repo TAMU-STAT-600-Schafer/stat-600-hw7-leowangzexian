@@ -77,11 +77,11 @@ one_pass <- function(X, y, K, W1, b1, W2, b2, lambda){
   out = loss_grad_scores(y, scores, K) # using the previous function written
   
   # Get gradient for 2nd layer W2, b2 (use lambda as needed)
-  dW2 = t(H) %*% loss_grad$grad + lambda * W2 # regularisation for W2 with lambda to account for the ridge penalty
-  db2 = colSums(loss_grad$grad) + lambda * b2 # regularisation for b2 with lambda to account for the ridge penalty
+  dW2 = t(H) %*% out$grad + lambda * W2 # regularisation for W2 with lambda to account for the ridge penalty
+  db2 = colSums(out$grad) + lambda * b2 # regularisation for b2 with lambda to account for the ridge penalty
   
   # Get gradient for hidden, and 1st layer W1, b1 (use lambda as needed)
-  dH = loss_grad$grad %*% t(W2) # gradient of loss with respect to the hidden layer
+  dH = out$grad %*% t(W2) # gradient of loss with respect to the hidden layer
   dH[H == 0] = 0 # derivative of ReLU
   dW1 = t(X) %*% dH + lambda * W1 # regularization for W1 with lambda to account for the ridge penalty
   db1 = colSums(dH) + lambda * b1 # regularization for b1 with lambda to account for the ridge penalty
