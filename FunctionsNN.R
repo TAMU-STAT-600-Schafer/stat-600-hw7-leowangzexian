@@ -31,7 +31,7 @@ loss_grad_scores <- function(y, scores, K){
   # [ToDo] Calculate loss when lambda = 0
   # loss = ...
   P = exp(scores) / rowSums(exp(scores)) # softmax probabilities
-   
+  
   # use + 1 to convert indexing
   # sums the log probabilities of the class for each sample plus the ridge penalty term, which is = 0
   loss = - sum(log(P[cbind(1:n, y + 1)])) / n # computes the softmax loss function
@@ -65,33 +65,30 @@ one_pass <- function(X, y, K, W1, b1, W2, b2, lambda){
   n = nrow(X)
   # [To Do] Forward pass
   # From input to hidden 
-  z1 = X %*% W1 + matrix(rep(b1, n), nrow = n, byrow = TRUE) # input layer to hidden layer
+  H = X %*% W1 + matrix(b1, n, length(b1), byrow = TRUE) # input layer to hidden layer
   # ReLU
-  a1 = (abs(z1) + z1) / 2 # exactly the same as H[H < 0] = 0 but faster
+  H = (abs(H) + H) / 2 # exactly the same as H[H < 0] = 0 but faster
   
   # From hidden to output scores
-  scores = a1 %*% W2 + matrix(rep(b2, n), nrow = n, byrow = TRUE) # hidden layer to output layer
+  scores = H %*% W2 + matrix(b2, n, K, byrow = TRUE) # hidden layer to output layer
   
   # [ToDo] Backward pass
   # Get loss, error, gradient at current scores using loss_grad_scores function
-  loss_info = loss_grad_scores(y, scores, K) # using the previous function written
-  loss = loss_info$loss
-  grad_scores = loss_info$grad
-  error = loss_info$error
+  out = loss_grad_scores(y, scores, K) # using the previous function written
   
   # Get gradient for 2nd layer W2, b2 (use lambda as needed)
-  dW2 = t(a1) %*% grad_scores + lambda * W2 # regularisation for W2 with lambda to account for the ridge penalty
-  db2 = colSums(grad_scores) + lambda * b2 # regularisation for b2 with lambda to account for the ridge penalty
+  dW2 = t(H) %*% out$grad + lambda * W2 # regularisation for W2 with lambda to account for the ridge penalty
+  db2 = colSums(out$grad) + lambda * b2 # regularisation for b2 with lambda to account for the ridge penalty
   
   # Get gradient for hidden, and 1st layer W1, b1 (use lambda as needed)
-  da1 = grad_scores %*% t(W2) # gradient of loss with respect to the hidden layer
-  dz1 = da1 * (z1 > 0) # derivative of ReLU
-  dW1 = t(X) %*% dz1 + lambda * W1 # regularization for W1 with lambda to account for the ridge penalty
-  db1 = colSums(dz1) + lambda * b1 # regularization for b1 with lambda to account for the ridge penalty
+  dH = out$grad %*% t(W2) # gradient of loss with respect to the hidden layer
+  dH[H == 0] = 0 # derivative of ReLU
+  dW1 = t(X) %*% dH + lambda * W1 # regularization for W1 with lambda to account for the ridge penalty
+  db1 = colSums(dH) + lambda * b1 # regularization for b1 with lambda to account for the ridge penalty
   
   # Return output (loss and error from forward pass,
   # list of gradients from backward pass)
-  return(list(loss = loss, error = error, grads = list(dW1 = dW1, db1 = db1, dW2 = dW2, db2 = db2)))
+  return(list(loss = out$loss, error = out$error, grads = list(dW1 = dW1, db1 = db1, dW2 = dW2, db2 = db2)))
 }
 
 # Function to evaluate validation set error
@@ -104,14 +101,14 @@ one_pass <- function(X, y, K, W1, b1, W2, b2, lambda){
 # b2 - a vector of size K of intercepts
 evaluate_error <- function(Xval, yval, W1, b1, W2, b2){
   # [ToDo] Forward pass to get scores on validation data
-  z1_val = Xval %*% W1 + matrix(rep(b1, nrow(Xval)), nrow = nrow(Xval), byrow = TRUE) # input layer to hidden layer
-  a1_val = (abs(z1_val) + z1_val) / 2 # exactly the same as Hval[Hval < 0] = 0 but faster
-  scores_val = a1_val %*% W2 + matrix(rep(b2, nrow(Xval)), nrow = nrow(Xval), byrow = TRUE) # hidden layer to output layer
+  Hval = Xval %*% W1 + matrix(b1, nrow(Xval), length(b1), byrow = TRUE) # input layer to hidden layer
+  Hval = (abs(Hval) + Hval) / 2 # exactly the same as Hval[Hval < 0] = 0 but faster
+  scores_val = Hval %*% W2 + matrix(b2, nrow(Xval), length(b2), byrow = TRUE) # hidden layer to output layer
   # [ToDo] Evaluate error rate (in %) when 
   # comparing scores-based predictions with true yval
-  P_scores_val = exp(scores_val) / rowSums(exp(scores_val))
-  pred = max.col(P_scores_val) - 1
-  error = 100 * mean(pred != yval) # computes the proportion of misclassified samples
+  P = exp(scores_val) / rowSums(exp(scores_val))
+  predictions = max.col(P) - 1
+  error = 100 * mean(predictions != yval) # computes the proportion of misclassified samples
   # return the error and this function evaluates the validation set error with only forward pass
   return(error)
 }
@@ -136,7 +133,7 @@ NN_train <- function(X, y, Xval, yval, lambda = 0.01,
   # Get sample size and total number of batches
   n = length(y)
   nBatch = floor(n / mbatch)
-
+  
   # [ToDo] Initialize b1, b2, W1, W2 using initialize_bw with seed as seed,
   # and determine any necessary inputs from supplied ones
   init_list = initialize_bw(ncol(X), hidden_p, length(unique(y)), scale, seed)
@@ -154,42 +151,35 @@ NN_train <- function(X, y, Xval, yval, lambda = 0.01,
   # Set seed for reproducibility
   set.seed(seed)
   # Start iterations
-  for (epoch in 1:nEpoch){
+  for (i in 1:nEpoch){
     # Allocate bathes
     batchids = sample(rep(1:nBatch, length.out = n), size = n)
-    epoch_loss = 0 # initialise current loss
-    epoch_error = 0 # initialise current error
+    cur_loss = 0 # initialise current loss
+    cur_error = 0 # initialise current error
     # [ToDo] For each batch
     #  - do one_pass to determine current error and gradients
     #  - perform SGD step to update the weights and intercepts
-    for (batch in 1:nBatch){
-      # define batch indices
-      batch_idx = batchids[((batch - 1) * mbatch + 1):min(batch * mbatch, n)]
-      X_batch = X[batch_idx, , drop = FALSE]
-      y_batch = y[batch_idx]
-      
+    for (j in 1:nBatch){
       # performing one pass, with forward pass and backward pass
-      pass_result = one_pass(X_batch, y_batch, length(unique(y)), W1, b1, W2, b2, lambda)
-      loss = pass_result$loss
-      error_batch = pass_result$error
-      grads = pass_result$grads
+      pass = one_pass(X[batchids == j, , drop = FALSE], y[batchids == j], length(unique(y)), W1, b1, W2, b2, lambda)
+      gradient = pass$grads # get gradients
       
       # update loss and error
-      epoch_loss = epoch_loss + loss
-      epoch_error = epoch_error + error_batch
+      cur_loss = cur_loss + pass$loss
+      cur_error = cur_error + pass$error
       
       # updating weights and biases via gradient descent
-      W1 = W1 - rate * grads$dW1
-      b1 = b1 - rate * grads$db1
-      W2 = W2 - rate * grads$dW2
-      b2 = b2 - rate * grads$db2
+      W1 = W1 - rate * gradient$dW1
+      b1 = b1 - rate * gradient$db1
+      W2 = W2 - rate * gradient$dW2
+      b2 = b2 - rate * gradient$db2
     }
     # [ToDo] In the end of epoch, evaluate
     # - average training error across batches
     # - validation error using evaluate_error function
-    error[epoch] = epoch_error / nBatch # computes average loss per batch and error for each epoch
-    error_val[epoch] = evaluate_error(Xval, yval, W1, b1, W2, b2) # computes validation loss using forward pass only
-    cat("Epoch:", epoch, "Train Error:", error[epoch], "Validation Error:", error_val[epoch], "\n")
+    error[i] = cur_error / nBatch # computes average loss per batch and error for each epoch
+    error_val[i] = evaluate_error(Xval, yval, W1, b1, W2, b2) # computes validation loss using forward pass only
+    cat("Epoch", i, "Training Error:", error[i], "Validation Error:", error_val[i], "\n")
   }
   # Return end result
   return(list(error = error, error_val = error_val, params =  list(W1 = W1, b1 = b1, W2 = W2, b2 = b2)))
