@@ -74,7 +74,7 @@ one_pass <- function(X, y, K, W1, b1, W2, b2, lambda){
   
   # [ToDo] Backward pass
   # Get loss, error, gradient at current scores using loss_grad_scores function
-  loss_grad = loss_grad_scores(y, scores, K) # using the previous function written
+  out = loss_grad_scores(y, scores, K) # using the previous function written
   
   # Get gradient for 2nd layer W2, b2 (use lambda as needed)
   dW2 = t(H) %*% loss_grad$grad + lambda * W2 # regularisation for W2 with lambda to account for the ridge penalty
@@ -153,7 +153,8 @@ NN_train <- function(X, y, Xval, yval, lambda = 0.01,
   for (i in 1:nEpoch){
     # Allocate bathes
     batchids = sample(rep(1:nBatch, length.out = n), size = n)
-    cur_loss = 0; cur_error = 0 # initialise current loss and current error
+    cur_loss = 0 # initialise current loss
+    cur_error = 0 # initialise current error
     # [ToDo] For each batch
     #  - do one_pass to determine current error and gradients
     #  - perform SGD step to update the weights and intercepts
