@@ -7,14 +7,14 @@
 # seed - specified seed to use before random normal draws
 initialize_bw <- function(p, hidden_p, K, scale = 1e-3, seed = 12345){
   # [ToDo] Initialize intercepts as zeros
-  b1 = rep(0, hidden_p) # initialising intercepts for hidden layer
-  b2 = rep(0, K) # one for each class
+  b1 = rep(0, hidden_p) # initialising intercepts (biases) for hidden layer
+  b2 = rep(0, K) # initialising biases for output layer, one for each class
   
   # [ToDo] Initialize weights by drawing them iid from Normal
   # with mean zero and scale as sd
   set.seed(seed) # setting seed
-  W1 = scale * matrix(rnorm(p * hidden_p), p, hidden_p) # weight matrix for input to hidden layer
-  W2 = scale * matrix(rnorm(hidden_p * K), hidden_p, K) # weight matrix for hidden to output layer
+  W1 = scale * matrix(rnorm(p * hidden_p, mean = 0, sd = sqrt(2 / p)), p, hidden_p) # weight matrix for input to hidden layer
+  W2 = scale * matrix(rnorm(hidden_p * K, mean = 0, sd = sqrt(2 / hidden_p)), hidden_p, K) # weight matrix for hidden to output layer
   
   # Return
   return(list(b1 = b1, b2 = b2, W1 = W1, W2 = W2)) # returns the initialised parameters
@@ -151,6 +151,7 @@ NN_train <- function(X, y, Xval, yval, lambda = 0.01,
   set.seed(seed)
   # Start iterations
   for (i in 1:nEpoch){
+    rate = lr(i, rate) # get learning rate
     # Allocate bathes
     batchids = sample(rep(1:nBatch, length.out = n), size = n)
     cur_loss = 0 # initialise current loss
@@ -180,4 +181,12 @@ NN_train <- function(X, y, Xval, yval, lambda = 0.01,
   }
   # Return end result
   return(list(error = error, error_val = error_val, params =  list(W1 = W1, b1 = b1, W2 = W2, b2 = b2)))
+}
+
+# Function that continuously updates the learning rate
+lr = function(epoch, initial_lr = 0.1, decay_rate = 0.9, decay_epochs = 50) {
+  if (epoch %% decay_epochs == 0) {
+    return(initial_lr * decay_rate)
+  }
+  return(initial_lr)
 }
