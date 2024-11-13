@@ -60,21 +60,29 @@ loss_grad_scores <- function(y, scores, K){
 # b2 - a vector of size K of intercepts
 # lambda - a non-negative scalar, ridge parameter for gradient calculations
 one_pass <- function(X, y, K, W1, b1, W2, b2, lambda){
-
+  n = nrow(X)
   # [To Do] Forward pass
   # From input to hidden 
-  
+  H = X %*% W1 + matrix(b1, n, length(b1), byrow = TRUE) # input layer to hidden layer
   # ReLU
+  H = (abs(H) + H) / 2 # exactly the same as H[H < 0] = 0 but faster
   
   # From hidden to output scores
- 
+  scores = H %*% W2 + matrix(b2, n, K, byrow = TRUE) # hidden layer to output layer
   
   # [ToDo] Backward pass
   # Get loss, error, gradient at current scores using loss_grad_scores function
-
+  loss_grad = loss_grad_scores(y, scores, K) # using the previous function written
+  
   # Get gradient for 2nd layer W2, b2 (use lambda as needed)
+  dW2 = t(H) %*% loss_grad$grad + lambda * W2 # regularisation for W2 with lambda to account for the ridge penalty
+  db2 = colSums(loss_grad$grad) + lambda * b2 # regularisation for b2 with lambda to account for the ridge penalty
   
   # Get gradient for hidden, and 1st layer W1, b1 (use lambda as needed)
+  dH = loss_grad$grad %*% t(W2)  # gradient of loss with respect to the hidden layer
+  dH[H == 0] = 0  # derivative of ReLU
+  dW1 = t(X) %*% dH + lambda * W1  # regularization for W1 with lambda to account for the ridge penalty
+  db1 = colSums(dH) + lambda * b1  # regularization for b1 with lambda to account for the ridge penalty
   
   # Return output (loss and error from forward pass,
   # list of gradients from backward pass)
@@ -91,10 +99,13 @@ one_pass <- function(X, y, K, W1, b1, W2, b2, lambda){
 # b2 - a vector of size K of intercepts
 evaluate_error <- function(Xval, yval, W1, b1, W2, b2){
   # [ToDo] Forward pass to get scores on validation data
-  
+  Hval = Xval %*% W1 + matrix(b1, nrow(Xval), length(b1), byrow = TRUE) # input layer to hidden layer
+  Hval = (abs(Hval) + Hval) / 2 # exactly the same as Hval[Hval < 0] = 0 but faster
+  scores_val = Hval %*% W2 + matrix(b2, nrow(Xval), length(b2), byrow = TRUE) # hidden layer to output layer
   # [ToDo] Evaluate error rate (in %) when 
   # comparing scores-based predictions with true yval
-  
+  predictions = apply(scores_val, 1, which.max) - 1
+  error = 100 * mean(predictions != yval) # computes the proportion of misclassified samples
   return(error)
 }
 
