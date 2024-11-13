@@ -82,8 +82,8 @@ test_error # 13.3
 out2 = NN_train(Xtrain, Ytrain, Xval, Yval, lambda = 0.00001,
                 rate = 0.1, mbatch = 50, nEpoch = 500,
                 hidden_p = 800, scale = 1e-3, seed = 12345)
-plot(1:length(out2$error), out2$error, ylim = c(0, 70))
-lines(1:length(out2$error_val), out2$error_val, col = "red") # 0
+plot(1:length(out2$error), out2$error, ylim = c(0, 70)) # 0
+lines(1:length(out2$error_val), out2$error_val, col = "red")
 test_error = evaluate_error(Xt, Yt, out2$params$W1, out2$params$b1, out2$params$W2, out2$params$b2)
 test_error # 12.47
 
@@ -91,8 +91,8 @@ test_error # 12.47
 out2 = NN_train(Xtrain, Ytrain, Xval, Yval, lambda = 0.00001,
                 rate = 0.09, mbatch = 50, nEpoch = 500,
                 hidden_p = 800, scale = 1e-3, seed = 12345)
-plot(1:length(out2$error), out2$error, ylim = c(0, 70))
-lines(1:length(out2$error_val), out2$error_val, col = "red") # 0
+plot(1:length(out2$error), out2$error, ylim = c(0, 70)) # 0
+lines(1:length(out2$error_val), out2$error_val, col = "red")
 test_error = evaluate_error(Xt, Yt, out2$params$W1, out2$params$b1, out2$params$W2, out2$params$b2)
 test_error # 12.27
 
