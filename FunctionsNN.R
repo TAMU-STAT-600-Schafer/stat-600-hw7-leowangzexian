@@ -33,7 +33,7 @@ loss_grad_scores <- function(y, scores, K){
   P = exp(scores) / rowSums(exp(scores)) # softmax probabilities
   Y_encod = matrix(0, n, K)
   Y_encod[cbind(1:n, y + 1)] = 1 # use + 1 to convert indexing
-  
+  lambda = 0
   # sums the log probabilities of the class for each sample plus the ridge penalty term
   loss = - mean(rowSums(Y_encod * log(P))) + 0.5 * lambda * (sum(W1^2) + sum(W2^2)) # computes the softmax loss function
   

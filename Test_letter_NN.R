@@ -18,6 +18,8 @@ letter_test <- read.table("Data/letter-test.txt", header = F, colClasses = "nume
 Yt <- letter_test[, 1]
 Xt <- as.matrix(letter_test[, -1])
 
+setwd("/Users/wangzexianleo/Desktop/PhD/STAT600/HW/stat-600-hw7-leowangzexian")
+
 # Source the NN function
 source("FunctionsNN.R")
 
