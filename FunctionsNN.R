@@ -151,7 +151,7 @@ NN_train <- function(X, y, Xval, yval, lambda = 0.01,
   set.seed(seed)
   # Start iterations
   for (i in 1:nEpoch){
-    rate = lr(i, rate) # get learning rate
+    rate = lr(i, rate)
     # Allocate bathes
     batchids = sample(rep(1:nBatch, length.out = n), size = n)
     cur_loss = 0 # initialise current loss
@@ -178,6 +178,7 @@ NN_train <- function(X, y, Xval, yval, lambda = 0.01,
     # - validation error using evaluate_error function
     error[i] = cur_error / nBatch # computes average loss per batch and error for each epoch
     error_val[i] = evaluate_error(Xval, yval, W1, b1, W2, b2) # computes validation loss using forward pass only
+    cat("Epoch", i, "Training Error:", error[i], "Validation Error:", error_val[i], "\n")
   }
   # Return end result
   return(list(error = error, error_val = error_val, params =  list(W1 = W1, b1 = b1, W2 = W2, b2 = b2)))
