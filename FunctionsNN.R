@@ -30,10 +30,12 @@ loss_grad_scores <- function(y, scores, K){
   n = length(y)
   # [ToDo] Calculate loss when lambda = 0
   # loss = ...
+  P = exp(scores) / rowSums(exp(scores)) # softmax probabilities
   Y_encod = matrix(0, n, K)
   Y_encod[cbind(1:n, y + 1)] = 1 # use + 1 to convert indexing
-  log_scores = log(1 + exp(scores)) # take log for softmax scores
-  loss = - mean(rowSums(Y_encod * scores - log_scores)) # sums the log probabilities of the class for each sample plus the ridge penalty term
+  
+  # sums the log probabilities of the class for each sample plus the ridge penalty term
+  loss = - mean(rowSums(Y_encod * log(P))) + 0.5 * lambda * (sum(W1^2) + sum(W2^2)) # computes the softmax loss function
   
   # [ToDo] Calculate misclassification error rate (%)
   # when predicting class labels using scores versus true y
@@ -134,6 +136,7 @@ NN_train <- function(X, y, Xval, yval, lambda = 0.01,
   # [ToDo] Initialize b1, b2, W1, W2 using initialize_bw with seed as seed,
   # and determine any necessary inputs from supplied ones
   init_list = initialize_bw(ncol(X), hidden_p, length(unique(y)), scale, seed)
+  # initialising weights and biases
   # W1, b1, W2 and b2 have been initialised by the function initialize_bw
   W1 = init_list$W1
   b1 = init_list$b1
