@@ -69,30 +69,30 @@ lines(1:length(out2$error_val), out2$error_val, col = "red")
 test_error = evaluate_error(Xt, Yt, out2$params$W1, out2$params$b1, out2$params$W2, out2$params$b2)
 test_error # 14.91
 
-# increase hidden_p to 800
+# increase hidden_p to 1500
 out2 = NN_train(Xtrain, Ytrain, Xval, Yval, lambda = 0.0000001,
                 rate = 0.1, mbatch = 50, nEpoch = 150,
-                hidden_p = 800, scale = 1e-3, seed = 12345)
-plot(1:length(out2$error), out2$error, ylim = c(0, 70)) # 1.39
+                hidden_p = 1500, scale = 1e-3, seed = 12345)
+plot(1:length(out2$error), out2$error, ylim = c(0, 70)) # 0.72
 lines(1:length(out2$error_val), out2$error_val, col = "red")
 test_error = evaluate_error(Xt, Yt, out2$params$W1, out2$params$b1, out2$params$W2, out2$params$b2)
-test_error # 13.38
+test_error # 13.15
 
 # increase nEpoch to 500
-out2 = NN_train(Xtrain, Ytrain, Xval, Yval, lambda = 0.00001,
+out2 = NN_train(Xtrain, Ytrain, Xval, Yval, lambda = 0.0000001,
                 rate = 0.1, mbatch = 50, nEpoch = 500,
-                hidden_p = 800, scale = 1e-3, seed = 12345)
+                hidden_p = 1500, scale = 1e-3, seed = 12345)
 plot(1:length(out2$error), out2$error, ylim = c(0, 70)) # 0
 lines(1:length(out2$error_val), out2$error_val, col = "red")
 test_error = evaluate_error(Xt, Yt, out2$params$W1, out2$params$b1, out2$params$W2, out2$params$b2)
-test_error # 12.7
+test_error # 12.49
 
-# decrease rate to 0.099
-out2 = NN_train(Xtrain, Ytrain, Xval, Yval, lambda = 0.00001,
-                rate = 0.099, mbatch = 50, nEpoch = 500,
-                hidden_p = 800, scale = 1e-3, seed = 12345)
+# decrease rate to 0.098
+out2 = NN_train(Xtrain, Ytrain, Xval, Yval, lambda = 0.0000001,
+                rate = 0.095, mbatch = 50, nEpoch = 500,
+                hidden_p = 1500, scale = 1e-3, seed = 12345)
 plot(1:length(out2$error), out2$error, ylim = c(0, 70)) # 0
 lines(1:length(out2$error_val), out2$error_val, col = "red")
 test_error = evaluate_error(Xt, Yt, out2$params$W1, out2$params$b1, out2$params$W2, out2$params$b2)
-test_error # 12.27
+test_error # 12.34
 
