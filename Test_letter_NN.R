@@ -87,7 +87,7 @@ lines(1:length(out2$error_val), out2$error_val, col = "red")
 test_error = evaluate_error(Xt, Yt, out2$params$W1, out2$params$b1, out2$params$W2, out2$params$b2)
 test_error # 12.49
 
-# decrease rate to 0.098
+# decrease rate to 0.095
 out2 = NN_train(Xtrain, Ytrain, Xval, Yval, lambda = 0.0000001,
                 rate = 0.095, mbatch = 50, nEpoch = 500,
                 hidden_p = 1500, scale = 1e-3, seed = 12345)
