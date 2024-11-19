@@ -42,7 +42,7 @@ plot(out$error_test, type = 'o') # around 25 if keep training
 out2 = NN_train(Xtrain, Ytrain, Xval, Yval, lambda = 0.001,
                 rate = 0.1, mbatch = 50, nEpoch = 150,
                 hidden_p = 100, scale = 1e-3, seed = 12345)
-plot(1:length(out2$error), out2$error, ylim = c(0, 70)) # 5.67
+plot(1:length(out2$error), out2$error, ylim = c(0, 70)) # 6.33
 lines(1:length(out2$error_val), out2$error_val, col = "red")
 
 # Evaluate error on testing data
@@ -64,19 +64,19 @@ microbenchmark(
 out2 = NN_train(Xtrain, Ytrain, Xval, Yval, lambda = 0.0000001,
                 rate = 0.1, mbatch = 50, nEpoch = 150,
                 hidden_p = 100, scale = 1e-3, seed = 12345)
-plot(1:length(out2$error), out2$error, ylim = c(0, 70)) # 5.27
+plot(1:length(out2$error), out2$error, ylim = c(0, 70)) # 4.50
 lines(1:length(out2$error_val), out2$error_val, col = "red")
 test_error = evaluate_error(Xt, Yt, out2$params$W1, out2$params$b1, out2$params$W2, out2$params$b2)
-test_error # 16.1
+test_error # 14.91
 
 # increase hidden_p to 800
 out2 = NN_train(Xtrain, Ytrain, Xval, Yval, lambda = 0.0000001,
                 rate = 0.1, mbatch = 50, nEpoch = 150,
                 hidden_p = 800, scale = 1e-3, seed = 12345)
-plot(1:length(out2$error), out2$error, ylim = c(0, 70)) # 0.333
+plot(1:length(out2$error), out2$error, ylim = c(0, 70)) # 1.39
 lines(1:length(out2$error_val), out2$error_val, col = "red")
 test_error = evaluate_error(Xt, Yt, out2$params$W1, out2$params$b1, out2$params$W2, out2$params$b2)
-test_error # 13.3
+test_error # 13.38
 
 # increase nEpoch to 500
 out2 = NN_train(Xtrain, Ytrain, Xval, Yval, lambda = 0.00001,
@@ -85,11 +85,11 @@ out2 = NN_train(Xtrain, Ytrain, Xval, Yval, lambda = 0.00001,
 plot(1:length(out2$error), out2$error, ylim = c(0, 70)) # 0
 lines(1:length(out2$error_val), out2$error_val, col = "red")
 test_error = evaluate_error(Xt, Yt, out2$params$W1, out2$params$b1, out2$params$W2, out2$params$b2)
-test_error # 12.47
+test_error # 12.7
 
-# decrease rate to 0.09
+# decrease rate to 0.099
 out2 = NN_train(Xtrain, Ytrain, Xval, Yval, lambda = 0.00001,
-                rate = 0.09, mbatch = 50, nEpoch = 500,
+                rate = 0.099, mbatch = 50, nEpoch = 500,
                 hidden_p = 800, scale = 1e-3, seed = 12345)
 plot(1:length(out2$error), out2$error, ylim = c(0, 70)) # 0
 lines(1:length(out2$error_val), out2$error_val, col = "red")
