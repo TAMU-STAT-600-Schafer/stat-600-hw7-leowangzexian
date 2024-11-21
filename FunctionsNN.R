@@ -101,9 +101,9 @@ one_pass <- function(X, y, K, W1, b1, W2, b2, lambda){
 # b2 - a vector of size K of intercepts
 evaluate_error <- function(Xval, yval, W1, b1, W2, b2){
   # [ToDo] Forward pass to get scores on validation data
-  Hval = Xval %*% W1 + b1 # input layer to hidden layer
+  Hval = Xval %*% W1 + matrix(b1, nrow(Xval), length(b1), byrow = TRUE) # input layer to hidden layer
   Hval = (abs(Hval) + Hval) / 2 # exactly the same as Hval[Hval < 0] = 0 but faster
-  scores_val = Hval %*% W2 + b2 # hidden layer to output layer
+  scores_val = Hval %*% W2 + matrix(b2, nrow(Xval), length(b2), byrow = TRUE) # hidden layer to output layer
   # [ToDo] Evaluate error rate (in %) when 
   # comparing scores-based predictions with true yval
   P = exp(scores_val) / rowSums(exp(scores_val))
